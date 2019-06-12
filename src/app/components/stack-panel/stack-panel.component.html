@@ -1,0 +1,4 @@
+<div class="content" *ngFor="let content of contentList; let i=index" [ngClass]="{hide_element: selectedIndex!=i}">
+  <ng-container *ngTemplateOutlet="content">
+  </ng-container>
+</div>

@@ -1,0 +1,15 @@
+.search-form {
+  padding-top: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+
+  dx-form {
+    width: 100%;
+  }
+
+  .search-button {
+    padding-left: 20px;
+    padding-top: 19px;
+  }
+}

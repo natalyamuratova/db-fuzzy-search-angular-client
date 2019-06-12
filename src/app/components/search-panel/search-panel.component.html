@@ -1,0 +1,64 @@
+<div class="search-form">
+  <dx-form
+    [(formData)]="searchModel"
+    colCount="4">
+    <dxi-item
+      dataField="database"
+      [label]="{text: 'База данных', location: 'top'}"
+      [colSpan]="1"
+      editorType="dxSelectBox"
+      [editorOptions]="{
+          items: dbNames,
+          width: '100%',
+          placeholder: '',
+          showClearButton: true,
+          searchEnabled: true,
+          minSearchLength: 0,
+          searchTimeout: 500,
+          noDataText: 'Нет данных',
+          onSelectionChanged: onDbSelectionChanged
+      }"
+    ></dxi-item>
+    <dxi-item
+      dataField="tableName"
+      [label]="{text: 'Таблица', location: 'top'}"
+      [colSpan]="1"
+      editorType="dxSelectBox"
+      [editorOptions]="{
+          items: dbTableNames,
+          width: '100%',
+          placeholder: '',
+          showClearButton: true,
+          searchEnabled: true,
+          minSearchLength: 0,
+          searchTimeout: 500,
+          noDataText: 'Нет данных',
+          disabled: !searchModel.database,
+          onSelectionChanged: onTableNameSelectionChanged
+      }"
+    ></dxi-item>
+    <dxi-item
+      dataField="columns"
+      [label]="{text: 'Колонки', location: 'top'}"
+      [colSpan]="2"
+      editorType="dxTagBox"
+      [editorOptions]="{
+          items: tableColumns,
+          width: '100%',
+          placeholder: '',
+          showClearButton: true,
+          searchEnabled: true,
+          minSearchLength: 0,
+          searchTimeout: 500,
+          noDataText: 'Нет данных',
+          disabled: !searchModel.database || !searchModel.tableName
+      }"
+    ></dxi-item>
+  </dx-form>
+  <div class="search-button">
+    <dx-button
+      text="Поиск"
+      (onClick)="onSearchBtnClicked($event)"
+    ></dx-button>
+  </div>
+</div>

@@ -1,0 +1,14 @@
+<div class="connection-form">
+  <dx-form
+    [(formData)]="connModel"
+    [items]="formItems"
+    colCount="1">
+  </dx-form>
+  <div class="conn-button">
+    <dx-button
+      text="Подключиться"
+      (onClick)="onConnectClicked($event)"
+    ></dx-button>
+  </div>
+</div>
+

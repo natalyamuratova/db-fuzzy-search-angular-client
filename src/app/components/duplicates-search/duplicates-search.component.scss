@@ -1,0 +1,10 @@
+
+.tables-content {
+  $filterHeight: 85px;
+  $footerHeight: 40px;
+
+  height: calc(100vh - #{($filterHeight + $footerHeight)});
+
+  padding-top: 20px;
+  min-height: 300px;
+}
