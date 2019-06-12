@@ -1,11 +1,12 @@
-import {Component} from '@angular/core';
-import {DataService} from '../../services/data.service';
+import {Component, ViewChild} from '@angular/core';
+import {SearchModel} from '../../models/search.model';
+import {AllDataGridComponent} from '../all-data-grid/all-data-grid.component';
+import {MatchedDataGridComponent} from '../matched-data-grid/matched-data-grid.component';
 
 @Component({
   selector: 'app-duplicates-search',
   templateUrl: './duplicates-search.component.html',
-  styleUrls: ['./duplicates-search.component.scss'],
-  providers: [DataService]
+  styleUrls: ['./duplicates-search.component.scss']
 })
 export class DuplicatesSearchComponent {
 
@@ -14,10 +15,18 @@ export class DuplicatesSearchComponent {
     {id: 1, name: 'Группы'}
   ];
 
+  @ViewChild(AllDataGridComponent) allDataGridComponent: AllDataGridComponent;
+  @ViewChild(MatchedDataGridComponent) matchedDataGridComponent: MatchedDataGridComponent;
 
-  constructor(private dataService: DataService) {
-
+  public onTableSelected(tableName: string) {
+    this.allDataGridComponent.update(tableName);
   }
 
+  public onSearchClicked(searchModel: SearchModel) {
+    if (!searchModel) {
+      return;
+    }
+    this.matchedDataGridComponent.update(searchModel.tableName, searchModel.columns);
+  }
 
 }

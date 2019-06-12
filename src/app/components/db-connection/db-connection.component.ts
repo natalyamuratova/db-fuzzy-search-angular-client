@@ -1,26 +1,30 @@
 import {Component} from '@angular/core';
 import {DbConnectionModel} from '../../models/db-connection.model';
-import {DataService} from '../../services/data.service';
+import {DatabaseService} from '../../services/database.service';
+import {CommonDataService} from '../../services/common-data.service';
 
 @Component({
   selector: 'app-db-connection',
   templateUrl: './db-connection.component.html',
-  styleUrls: ['./db-connection.component.scss'],
-  providers: [DataService]
+  styleUrls: ['./db-connection.component.scss']
 })
 export class DbConnectionComponent {
 
   public connModel: DbConnectionModel;
   public formItems: any[];
 
-  constructor(private dataService: DataService) {
-    this.connModel = new DbConnectionModel();
+  constructor(private databaseService: DatabaseService,
+              private commonDataService: CommonDataService) {
+    this.connModel = commonDataService.connection;
+    if (!this.connModel) {
+      this.connModel = new DbConnectionModel();
+    }
     this.formItems = this.getFormItems();
   }
 
   public onConnectClicked(e) {
-    this.dataService.testConnection(this.connModel).subscribe(res => {
-        console.log();
+    this.databaseService.testConnection(this.connModel).subscribe(res => {
+        this.commonDataService.connection = this.connModel;
       }
     );
   }

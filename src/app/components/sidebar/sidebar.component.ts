@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import {CommonDataService} from '../../services/common-data.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -7,4 +8,6 @@ import { Component } from '@angular/core';
 })
 export class SidebarComponent {
 
+  constructor(commonDataService: CommonDataService) {
+  }
 }

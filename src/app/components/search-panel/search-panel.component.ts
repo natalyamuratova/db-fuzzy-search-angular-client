@@ -1,12 +1,12 @@
-import {Component} from '@angular/core';
+import {Component, EventEmitter, Output} from '@angular/core';
 import {SearchModel} from '../../models/search.model';
-import {DataService} from '../../services/data.service';
+import {DatabaseService} from '../../services/database.service';
+import {CommonDataService} from '../../services/common-data.service';
 
 @Component({
   selector: 'app-search-panel',
   templateUrl: './search-panel.component.html',
-  styleUrls: ['./search-panel.component.scss'],
-  providers: [DataService]
+  styleUrls: ['./search-panel.component.scss']
 })
 export class SearchPanelComponent {
 
@@ -16,46 +16,56 @@ export class SearchPanelComponent {
   private dbTableNames: string[];
   private tableColumns: string[];
 
-  constructor(private dataService: DataService) {
+  @Output() searchClick: EventEmitter<SearchModel> = new EventEmitter();
+  @Output() tableSelected: EventEmitter<string> = new EventEmitter();
+
+  constructor(private databaseService: DatabaseService,
+              commonDataService: CommonDataService) {
+    this.searchModel = commonDataService.searchModel;
+    if (!this.searchModel) {
+      this.searchModel = new SearchModel();
+    }
     this.getDbNames();
     this.dbTableNames = [];
     this.tableColumns = [];
-    this.searchModel = new SearchModel();
   }
 
   public onSearchBtnClicked(e) {
-
+    this.searchClick.emit(this.searchModel);
   }
 
-
   public onDbSelectionChanged = (e) => {
+    this.dbTableNames = [];
+    this.tableColumns = [];
     const value = e.selectedItem;
-    if (value) {
-      this.getTableNames(value);
-    } else {
-      this.dbTableNames = [];
+    if (!value) {
+      return;
     }
+    this.databaseService.useDatabase(value).subscribe(res => {
+      this.getTableNames();
+    });
   }
 
   public onTableNameSelectionChanged = (e) => {
+    this.tableColumns = [];
     const value = e.selectedItem;
-    if (value) {
-      this.getTableColumns(value);
-    } else {
-      this.tableColumns = [];
+    this.tableSelected.emit(value);
+    if (!value) {
+      return;
     }
+    this.getTableColumns(value);
   }
 
   private getDbNames() {
-    this.dataService.getDbNames().subscribe((res: string[]) => {
+    this.databaseService.getDbNames().subscribe((res: string[]) => {
       this.dbNames = res;
     }, err => {
       this.dbNames = [];
     });
   }
 
-  private getTableNames(dbName: string) {
-    this.dataService.getTableNames(dbName).subscribe((res: string[]) => {
+  private getTableNames() {
+    this.databaseService.getTableNames().subscribe((res: string[]) => {
       this.dbTableNames = res;
     }, err => {
       this.dbTableNames = [];
@@ -63,7 +73,7 @@ export class SearchPanelComponent {
   }
 
   private getTableColumns(tableName: string) {
-    this.dataService.getTableColumns(tableName).subscribe((res: string[]) => {
+    this.databaseService.getTableColumns(tableName).subscribe((res: string[]) => {
       this.tableColumns = res;
     }, err => {
       this.tableColumns = [];

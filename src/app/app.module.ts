@@ -13,9 +13,11 @@ import {DuplicatesSearchComponent} from './components/duplicates-search/duplicat
 import {RouterModule, Routes} from '@angular/router';
 import {HttpClientModule} from '@angular/common/http';
 import {StackPanelComponent} from './components/stack-panel/stack-panel.component';
-import { AllDataGridComponent } from './components/all-data-grid/all-data-grid.component';
-import { MatchedDataGridComponent } from './components/matched-data-grid/matched-data-grid.component';
-import { SearchPanelComponent } from './components/search-panel/search-panel.component';
+import {AllDataGridComponent} from './components/all-data-grid/all-data-grid.component';
+import {MatchedDataGridComponent} from './components/matched-data-grid/matched-data-grid.component';
+import {SearchPanelComponent} from './components/search-panel/search-panel.component';
+import {CommonDataService} from './services/common-data.service';
+import {DatabaseService} from './services/database.service';
 
 const appRoutes: Routes = [
   {path: '', redirectTo: 'connection', pathMatch: 'full'},
@@ -43,7 +45,10 @@ const appRoutes: Routes = [
     DxFormModule,
     DxTabPanelModule
   ],
-  providers: [],
+  providers: [
+    DatabaseService,
+    CommonDataService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {

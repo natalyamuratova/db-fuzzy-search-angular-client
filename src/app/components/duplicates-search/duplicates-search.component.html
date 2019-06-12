@@ -1,4 +1,7 @@
-<app-search-panel></app-search-panel>
+<app-search-panel
+  (tableSelected)="onTableSelected($event)"
+  (searchClick)="onSearchClicked($event)"
+></app-search-panel>
 
 <div class="tables-content">
   <dx-tab-panel #tabPanel
