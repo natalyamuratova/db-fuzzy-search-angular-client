@@ -4,20 +4,13 @@
 ></app-search-panel>
 
 <div class="tables-content">
-  <dx-tab-panel #tabPanel
-                [height]="'100%'"
-                [dataSource]="tabs"
-                [selectedIndex]="selectedIndex"
-                [loop]="false"
-                [animationEnabled]="true">
-    <div *dxTemplate="let tab of 'title'">
-      <span>{{tab.name}}</span>
-    </div>
-    <div *dxTemplate="let tab of 'item'">
-      <app-stack-panel [selectedIndex]="tab.id" [contentList]="[allData, matchedData]">
-      </app-stack-panel>
-    </div>
-  </dx-tab-panel>
+  <dx-tabs
+    [width]="400"
+    [dataSource]="tabs"
+    [(selectedIndex)]="selectedIndex">
+  </dx-tabs>
+  <app-stack-panel [selectedIndex]="selectedIndex" [contentList]="[allData, matchedData]">
+  </app-stack-panel>
 </div>
 
 <ng-template #allData>

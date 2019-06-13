@@ -41,7 +41,7 @@ export class MatchedDataGridComponent {
     this.databaseService.getClusterLabels(newDictionary).subscribe(labels => {
       this.tableData = [];
       analyzedTableData.forEach((item, index) => {
-        const groupedItem = {groupIndex: labels[index], ...item};
+        const groupedItem = {groupIndex: labels[index] + 1, ...item};
         this.tableData.push(groupedItem);
       });
       this.buildTableColumns(analyzedTableData);
@@ -52,6 +52,7 @@ export class MatchedDataGridComponent {
     if (!data || data.length === 0) {
       return;
     }
+    this.columns = [];
     Object.keys(data[0]).forEach((key) => {
       const column: any = {};
       column.dataField = key;

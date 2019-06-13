@@ -1,0 +1,7 @@
+::ng-deep #allDataGrid {
+  $filterHeight: 65px;
+  $tabHeight: 65px;
+  $footerHeight: 40px;
+
+  height: calc(100vh - #{($filterHeight + $tabHeight + $footerHeight)});
+}

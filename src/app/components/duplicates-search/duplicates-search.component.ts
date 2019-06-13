@@ -12,8 +12,8 @@ export class DuplicatesSearchComponent {
 
   public selectedIndex = 0;
   public tabs = [
-    {id: 0, name: 'Все данные'},
-    {id: 1, name: 'Группы'}
+    {id: 0, text: 'Все данные'},
+    {id: 1, text: 'Группы'}
   ];
 
   @ViewChild(AllDataGridComponent) allDataGridComponent: AllDataGridComponent;

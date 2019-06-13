@@ -1,6 +1,9 @@
-<dx-data-grid *ngIf="tableData"
-              [dataSource]="tableData"
-              [columns]="columns"
-              [remoteOperations]="false">
+<dx-data-grid
+  id="allDataGrid"
+  [dataSource]="tableData"
+  [columns]="columns"
+  [remoteOperations]="false"
+  noDataText=""
+  [showBorders]="true">
   <dxo-scrolling mode="virtual"></dxo-scrolling>
 </dx-data-grid>

@@ -5,7 +5,7 @@ import {
   DxButtonModule,
   DxDataGridModule,
   DxFormModule,
-  DxTabPanelModule
+  DxTabsModule
 } from 'devextreme-angular';
 import {DbConnectionComponent} from './components/db-connection/db-connection.component';
 import {SidebarComponent} from './components/sidebar/sidebar.component';
@@ -43,7 +43,7 @@ const appRoutes: Routes = [
     DxDataGridModule,
     DxButtonModule,
     DxFormModule,
-    DxTabPanelModule
+    DxTabsModule
   ],
   providers: [
     DatabaseService,
