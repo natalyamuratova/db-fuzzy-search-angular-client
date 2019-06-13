@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {DbConnectionModel} from '../models/db-connection.model';
 
 @Injectable({
@@ -48,12 +48,38 @@ export class DatabaseService {
       return;
     }
     const url = `${this.dbConnectionUrl}/tables/${tableName}/data`;
-    return this.http.get(url, this.getDefaultHttpOptions());
+    const options = this.getDefaultHttpOptions();
+    if (full != null) {
+      this.addParam(options, 'full', full);
+    }
+    if (columns && columns.length > 0) {
+      this.addParam(options, 'column', columns);
+    }
+    return this.http.get(url, options);
+  }
+
+  public getClusterLabels(dictionary: any[]) {
+    const url = `${this.dbConnectionUrl}/cluster`;
+    return this.http.post(url, {dictionary: dictionary}, this.getDefaultHttpOptions());
   }
 
   private getDefaultHttpOptions() {
     return {
       headers: new HttpHeaders({'Content-Type': 'application/json'})
     };
+  }
+
+  private addParam(options: any, keyName: string, value: any, append?: boolean) {
+    if (options.params) {
+      let newParams: HttpParams;
+      if (options.params instanceof HttpParams) {
+        newParams = options.params;
+        options.params = append ? newParams.append(keyName, value) : newParams.set(keyName, value);
+      } else {
+        options.params[keyName] = value;
+      }
+    } else {
+      options.params = {[keyName]: value};
+    }
   }
 }

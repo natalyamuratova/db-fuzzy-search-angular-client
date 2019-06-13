@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {DatabaseService} from '../../services/database.service';
+import {combineLatest} from 'rxjs';
 
 @Component({
   selector: 'app-matched-data-grid',
@@ -9,22 +10,45 @@ import {DatabaseService} from '../../services/database.service';
 })
 export class MatchedDataGridComponent {
 
-  private dictionary: any[];
-  private analyzedTableData: any[];
+  private tableData: any;
 
   constructor(private databaseService: DatabaseService) {
+    this.tableData = [];
   }
 
   public update(tableName: string, columns: string[]) {
-    this.databaseService.getTableData(tableName, false, columns).subscribe((res: any[]) => {
-      this.dictionary = res;
-    }, err => {
-      this.dictionary = null;
+    this.tableData = [];
+    if (!tableName || !columns || columns.length === 0) {
+      return;
+    }
+    combineLatest(
+      this.databaseService.getTableData(tableName, false, columns),
+      this.databaseService.getTableData(tableName, true, columns)
+    ).subscribe(([dictionary, analyzedTableData]) => {
+      this.getClusters(dictionary, analyzedTableData, columns);
     });
-    this.databaseService.getTableData(tableName, true, columns).subscribe((res: any[]) => {
-      this.analyzedTableData = res;
-    }, err => {
-      this.analyzedTableData = null;
+  }
+
+  private getClusters(dictionary: any, analyzedTableData: any, columns: string[]) {
+    if (!dictionary || dictionary.length === 0 ||
+      !analyzedTableData || analyzedTableData.length === 0 ||
+      !columns || columns.length === 0) {
+      return;
+    }
+    const newDictionary = [];
+    dictionary.forEach(item => {
+      if (item instanceof Object) {
+        const strings = [];
+        Object.keys(item).forEach(key => {
+          strings.push(item[key]);
+        });
+        newDictionary.push(strings);
+      } else {
+        newDictionary.push(item);
+      }
+    });
+    this.databaseService.getClusterLabels(newDictionary).subscribe(labels => {
+      console.log();
     });
   }
 
