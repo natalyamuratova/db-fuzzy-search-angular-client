@@ -2,6 +2,17 @@
   $filterHeight: 65px;
   $tabHeight: 65px;
   $footerHeight: 40px;
+  $buttonToolbar: 56px;
 
-  height: calc(100vh - #{($filterHeight + $tabHeight + $footerHeight)});
+  height: calc(100vh - #{($filterHeight + $tabHeight + $footerHeight + $buttonToolbar)});
+}
+
+.button-toolbar {
+  padding-top: 20px;
+  position: relative;
+
+  dx-button {
+    right: 0;
+    position: absolute;
+  }
 }

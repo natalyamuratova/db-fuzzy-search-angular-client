@@ -4,6 +4,19 @@
               [columns]="columns"
               [remoteOperations]="false"
               noDataText=""
+              [loadPanel]="{enabled: false}"
               [showBorders]="true">
   <dxo-scrolling mode="virtual"></dxo-scrolling>
+  <dxo-editing
+    mode="cell"
+    [allowUpdating]="true"
+    [allowDeleting]="false"
+    [allowAdding]="false">
+  </dxo-editing>
 </dx-data-grid>
+<div class="button-toolbar">
+  <dx-button
+    text="Объединить"
+    (onClick)="onUnionBtnClicked()"
+  ></dx-button>
+</div>

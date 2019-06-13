@@ -12,9 +12,17 @@ export class MatchedDataGridComponent {
   public columns: any[];
   public tableData: any;
 
+  private readonly GROUP_NAME_DATA_FIELD = 'groupIndex';
+  private readonly IS_PRIMARY_DATA_FIELD = 'isPrimary';
+  private readonly IS_UNION_ROW_DATA_FIELD = 'isUnionRow';
+
   constructor(private databaseService: DatabaseService) {
     this.tableData = null;
     this.columns = [];
+  }
+
+  public onUnionBtnClicked() {
+
   }
 
   public update(tableName: string, columns: string[]) {
@@ -41,8 +49,11 @@ export class MatchedDataGridComponent {
     this.databaseService.getClusterLabels(newDictionary).subscribe(labels => {
       this.tableData = [];
       analyzedTableData.forEach((item, index) => {
-        const groupedItem = {groupIndex: labels[index] + 1, ...item};
-        this.tableData.push(groupedItem);
+        const groupedItem = {...item};
+        groupedItem[this.GROUP_NAME_DATA_FIELD] = labels[index] + 1;
+        groupedItem[this.IS_PRIMARY_DATA_FIELD] = false;
+        groupedItem[this.IS_UNION_ROW_DATA_FIELD] = false;
+          this.tableData.push(groupedItem);
       });
       this.buildTableColumns(analyzedTableData);
     });
@@ -53,22 +64,44 @@ export class MatchedDataGridComponent {
       return;
     }
     this.columns = [];
+    this.columns.push(this.getGroupedByClusterColumn());
+    this.columns.push(this.getPrimaryRowColumn());
+    this.columns.push(this.getUnionRowColumn());
     Object.keys(data[0]).forEach((key) => {
       const column: any = {};
       column.dataField = key;
       column.allowSorting = true;
       column.allowResizing = true;
+      column.allowEditing = false;
       this.columns.push(column);
     });
-    this.columns.push(this.getGroupedByClusterColumn());
+  }
+
+  private getPrimaryRowColumn() {
+    const column: any = {};
+    column.dataField = this.IS_PRIMARY_DATA_FIELD;
+    column.caption = 'Основная';
+    column.dataType = 'boolean';
+    column.width = 90;
+    return column;
+  }
+
+  private getUnionRowColumn() {
+    const column: any = {};
+    column.dataField = this.IS_UNION_ROW_DATA_FIELD;
+    column.caption = 'Объединяемая';
+    column.dataType = 'boolean';
+    column.width = 120;
+    return column;
   }
 
   private getGroupedByClusterColumn() {
     const column: any = {};
-    column.dataField = 'groupIndex';
+    column.dataField = this.GROUP_NAME_DATA_FIELD;
     column.caption = 'Группа';
     column.allowSorting = true;
     column.allowResizing = true;
+    column.allowEditing = false;
     column.groupIndex = 0;
     return column;
   }
