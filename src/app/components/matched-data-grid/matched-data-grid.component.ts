@@ -1,23 +1,25 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {Component} from '@angular/core';
 import {DatabaseService} from '../../services/database.service';
 import {combineLatest} from 'rxjs';
 
 @Component({
   selector: 'app-matched-data-grid',
   templateUrl: './matched-data-grid.component.html',
-  styleUrls: ['./matched-data-grid.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./matched-data-grid.component.scss']
 })
 export class MatchedDataGridComponent {
 
-  private tableData: any;
+  public columns: any[];
+  public tableData: any;
 
   constructor(private databaseService: DatabaseService) {
-    this.tableData = [];
+    this.tableData = null;
+    this.columns = [];
   }
 
   public update(tableName: string, columns: string[]) {
-    this.tableData = [];
+    this.tableData = null;
+    this.columns = [];
     if (!tableName || !columns || columns.length === 0) {
       return;
     }
@@ -35,21 +37,54 @@ export class MatchedDataGridComponent {
       !columns || columns.length === 0) {
       return;
     }
-    const newDictionary = [];
+    const newDictionary = this.getDictionaryOfStringArrays(dictionary);
+    this.databaseService.getClusterLabels(newDictionary).subscribe(labels => {
+      this.tableData = [];
+      analyzedTableData.forEach((item, index) => {
+        const groupedItem = {groupIndex: labels[index], ...item};
+        this.tableData.push(groupedItem);
+      });
+      this.buildTableColumns(analyzedTableData);
+    });
+  }
+
+  private buildTableColumns(data: any[]) {
+    if (!data || data.length === 0) {
+      return;
+    }
+    Object.keys(data[0]).forEach((key) => {
+      const column: any = {};
+      column.dataField = key;
+      column.allowSorting = true;
+      column.allowResizing = true;
+      this.columns.push(column);
+    });
+    this.columns.push(this.getGroupedByClusterColumn());
+  }
+
+  private getGroupedByClusterColumn() {
+    const column: any = {};
+    column.dataField = 'groupIndex';
+    column.caption = 'Группа';
+    column.allowSorting = true;
+    column.allowResizing = true;
+    column.groupIndex = 0;
+    return column;
+  }
+
+  private getDictionaryOfStringArrays(dictionary: any[]) {
+    const array = [];
     dictionary.forEach(item => {
       if (item instanceof Object) {
         const strings = [];
         Object.keys(item).forEach(key => {
           strings.push(item[key]);
         });
-        newDictionary.push(strings);
+        array.push(strings);
       } else {
-        newDictionary.push(item);
+        array.push(item);
       }
     });
-    this.databaseService.getClusterLabels(newDictionary).subscribe(labels => {
-      console.log();
-    });
+    return array;
   }
-
 }

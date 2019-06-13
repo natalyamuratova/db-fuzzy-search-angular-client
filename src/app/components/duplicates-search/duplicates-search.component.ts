@@ -10,6 +10,7 @@ import {MatchedDataGridComponent} from '../matched-data-grid/matched-data-grid.c
 })
 export class DuplicatesSearchComponent {
 
+  public selectedIndex = 0;
   public tabs = [
     {id: 0, name: 'Все данные'},
     {id: 1, name: 'Группы'}
@@ -26,6 +27,7 @@ export class DuplicatesSearchComponent {
     if (!searchModel) {
       return;
     }
+    this.selectedIndex = 1;
     this.matchedDataGridComponent.update(searchModel.tableName, searchModel.columns);
   }
 

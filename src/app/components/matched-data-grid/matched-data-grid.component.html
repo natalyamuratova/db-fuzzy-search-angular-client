@@ -1,3 +1,6 @@
-<p>
-  matched-data-grid works!
-</p>
+<dx-data-grid *ngIf="tableData"
+              [dataSource]="tableData"
+              [columns]="columns"
+              [remoteOperations]="false">
+  <dxo-scrolling mode="virtual"></dxo-scrolling>
+</dx-data-grid>

@@ -7,7 +7,7 @@
   <dx-tab-panel #tabPanel
                 [height]="'100%'"
                 [dataSource]="tabs"
-                [selectedIndex]="0"
+                [selectedIndex]="selectedIndex"
                 [loop]="false"
                 [animationEnabled]="true">
     <div *dxTemplate="let tab of 'title'">
