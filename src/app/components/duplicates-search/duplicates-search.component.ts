@@ -21,6 +21,7 @@ export class DuplicatesSearchComponent {
 
   public onTableSelected(tableName: string) {
     this.allDataGridComponent.update(tableName);
+    this.matchedDataGridComponent.update(tableName, []);
   }
 
   public onSearchClicked(searchModel: SearchModel) {

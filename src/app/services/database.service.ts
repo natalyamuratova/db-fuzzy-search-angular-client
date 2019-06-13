@@ -43,6 +43,14 @@ export class DatabaseService {
     return this.http.get(url, this.getDefaultHttpOptions());
   }
 
+  public getPrimaryKeyName(tableName: string) {
+    if (!tableName) {
+      return;
+    }
+    const url = `${this.dbConnectionUrl}/tables/${tableName}/primaryKey`;
+    return this.http.get(url, this.getDefaultHttpOptions());
+  }
+
   public getTableData(tableName: string, full?: boolean, columns?: string[]) {
     if (!tableName) {
       return;

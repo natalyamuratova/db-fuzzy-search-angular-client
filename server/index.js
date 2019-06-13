@@ -19,6 +19,7 @@ app.post("/connection/:dbName", db.useDatabase);
 app.get("/databases", db.getDbNames);
 app.get("/tables", db.getTableNames);
 app.get("/tables/:tableName/columns", db.getColumns);
+app.get("/tables/:tableName/primaryKey", db.getPrimaryKeyName);
 app.get("/tables/:tableName/data", db.getTableData);
 app.post('/cluster', cluster.getClusters);
 

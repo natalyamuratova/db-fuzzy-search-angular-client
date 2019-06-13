@@ -59,6 +59,24 @@ const getColumns = (request, response) => {
   selectByField(response, sqlColumns, 'column_name');
 };
 
+const getPrimaryKeyName = (request, response) => {
+  const requestTable = request.params["tableName"];
+  if (!requestTable) {
+    return response.status(500).json({
+      success: false,
+      data: {message: 'Empty table name!'}
+    });
+  }
+  const sqlPrimaryKey =
+    "SELECT a.attname\n" +
+    "FROM pg_index i\n" +
+    "JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)\n" +
+    "WHERE i.indrelid = '" + requestTable + "'::regclass AND i.indisprimary";
+
+  selectByField(response, sqlPrimaryKey, 'attname');
+};
+
+
 const getTableData = (request, response) => {
   const requestTable = request.params["tableName"];
   if (!requestTable) {
@@ -145,5 +163,6 @@ module.exports = {
   getDbNames,
   getTableNames,
   getColumns,
+  getPrimaryKeyName,
   getTableData
 };

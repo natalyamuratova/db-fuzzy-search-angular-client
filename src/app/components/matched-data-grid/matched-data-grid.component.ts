@@ -12,6 +12,9 @@ export class MatchedDataGridComponent {
   public columns: any[];
   public tableData: any;
 
+  private currentTableName: string;
+  private primaryKeyName: string[];
+
   private readonly GROUP_NAME_DATA_FIELD = 'groupIndex';
   private readonly IS_PRIMARY_DATA_FIELD = 'isPrimary';
   private readonly IS_UNION_ROW_DATA_FIELD = 'isUnionRow';
@@ -19,6 +22,8 @@ export class MatchedDataGridComponent {
   constructor(private databaseService: DatabaseService) {
     this.tableData = null;
     this.columns = [];
+    this.currentTableName = null;
+    this.primaryKeyName = [];
   }
 
   public onUnionBtnClicked() {
@@ -26,8 +31,11 @@ export class MatchedDataGridComponent {
   }
 
   public update(tableName: string, columns: string[]) {
+    this.currentTableName = tableName;
     this.tableData = null;
     this.columns = [];
+    this.primaryKeyName = [];
+
     if (!tableName || !columns || columns.length === 0) {
       return;
     }
@@ -36,6 +44,9 @@ export class MatchedDataGridComponent {
       this.databaseService.getTableData(tableName, true, columns)
     ).subscribe(([dictionary, analyzedTableData]) => {
       this.getClusters(dictionary, analyzedTableData, columns);
+    });
+    this.databaseService.getPrimaryKeyName(tableName).subscribe((res: string[]) => {
+      this.primaryKeyName = res;
     });
   }
 
