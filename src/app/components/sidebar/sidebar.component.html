@@ -1,4 +1,6 @@
 <div class="sidebar">
-  <a routerLink="connection">Настройка подключения</a>
-  <a routerLink="search">Поиск дубликатов</a>
+  <a *ngFor="let item of menuItems"
+     [routerLink]="item.link"
+     [ngClass]="{active: item.selected}"
+  >{{item.text}}</a>
 </div>
