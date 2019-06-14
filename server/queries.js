@@ -139,22 +139,24 @@ const performRowsUnion = (request, response) => {
     });
   }
 
-  // получение первичных ключей таблицы requestTable
-  const sqlPrimaryKey =
-    "SELECT a.attname\n" +
-    "FROM pg_index i\n" +
-    "JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)\n" +
-    "WHERE i.indrelid = '" + requestTable + "'::regclass AND i.indisprimary";
-
   (async () => {
     const client = await pool.connect();
 
     try {
       await client.query('BEGIN');
+
+      // получение первичных ключей таблицы requestTable
+      const sqlPrimaryKey =
+        "SELECT a.attname\n" +
+        "FROM pg_index i\n" +
+        "JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)\n" +
+        "WHERE i.indrelid = '" + requestTable + "'::regclass AND i.indisprimary";
+
       const pKeys = await selectByField(sqlPrimaryKey, 'attname');
       if (!pKeys || pKeys.length === 0) {
         return;
       }
+
       // получение внешних ключей и таблиц, которые ссылаются на первичный ключ таблицы requestTable
       const sqlForeignKey =
         "SELECT DISTINCT tc.table_name, kcu.column_name\n" +
@@ -210,7 +212,7 @@ const performRowsUnion = (request, response) => {
 
           await updateLinks(tableFKeys);
 
-          // удаление строк
+          // удаление объединяемых строк внутри одной группы
           async function deleteLinks(requestTable, combined) {
             for (const row in combined) {
               const whereCond = pKeys.map(pKey => `"${pKey}"=${combined[row][pKey]}`);
