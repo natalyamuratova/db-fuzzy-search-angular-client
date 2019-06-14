@@ -26,6 +26,7 @@ export class AllDataGridComponent {
     this.columns = [];
   }
 
+  // обновление содержимого таблицы
   public update(tableName: string) {
     if (!tableName) {
       this.tableData = null;

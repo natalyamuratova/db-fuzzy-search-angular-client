@@ -1,6 +1,8 @@
-import {Component} from '@angular/core';
+import {Component, EventEmitter, Output, ViewChild} from '@angular/core';
 import {DatabaseService} from '../../services/database.service';
 import {combineLatest} from 'rxjs';
+import {CombinedRowsDataModel, CombinedTableRowsDataModel} from '../../models/combined-table-rows-data.model';
+import {DxDataGridComponent} from 'devextreme-angular';
 
 @Component({
   selector: 'app-matched-data-grid',
@@ -14,24 +16,38 @@ export class MatchedDataGridComponent {
 
   private currentTableName: string;
   private primaryKeyName: string[];
+  private analyzedColumns: string[];
 
   private readonly GROUP_NAME_DATA_FIELD = 'groupIndex';
   private readonly IS_PRIMARY_DATA_FIELD = 'isPrimary';
   private readonly IS_UNION_ROW_DATA_FIELD = 'isUnionRow';
+
+  @ViewChild(DxDataGridComponent) dataGrid: DxDataGridComponent;
+  @Output() rowsCombined: EventEmitter<string> = new EventEmitter();
 
   constructor(private databaseService: DatabaseService) {
     this.tableData = null;
     this.columns = [];
     this.currentTableName = null;
     this.primaryKeyName = [];
+    this.analyzedColumns = [];
   }
 
   public onUnionBtnClicked() {
-
+    if (!this.tableData || this.tableData.length === 0) {
+      return;
+    }
+    const combinedData = this.getCombinedRows();
+    this.databaseService.unionRows(this.currentTableName, combinedData).subscribe(res => {
+      this.rowsCombined.emit(this.currentTableName);
+      this.update(this.currentTableName, this.analyzedColumns);
+    });
   }
 
+  // обновление содержимного таблицы в соответствии с выбранными для анализа колонками
   public update(tableName: string, columns: string[]) {
     this.currentTableName = tableName;
+    this.analyzedColumns = columns;
     this.tableData = null;
     this.columns = [];
     this.primaryKeyName = [];
@@ -43,33 +59,34 @@ export class MatchedDataGridComponent {
       this.databaseService.getTableData(tableName, false, columns),
       this.databaseService.getTableData(tableName, true, columns)
     ).subscribe(([dictionary, analyzedTableData]) => {
-      this.getClusters(dictionary, analyzedTableData, columns);
+      this.getClusters(dictionary, analyzedTableData);
     });
     this.databaseService.getPrimaryKeyName(tableName).subscribe((res: string[]) => {
       this.primaryKeyName = res;
     });
   }
 
-  private getClusters(dictionary: any, analyzedTableData: any, columns: string[]) {
-    if (!dictionary || dictionary.length === 0 ||
-      !analyzedTableData || analyzedTableData.length === 0 ||
-      !columns || columns.length === 0) {
+  // получение кластеров по анализируемому словарю
+  private getClusters(dictionary: any, analyzedTableData: any) {
+    if (!dictionary || dictionary.length === 0 || !analyzedTableData || analyzedTableData.length === 0) {
       return;
     }
     const newDictionary = this.getDictionaryOfStringArrays(dictionary);
     this.databaseService.getClusterLabels(newDictionary).subscribe(labels => {
       this.tableData = [];
+      // преобразование данных таблицы (добавление данных о номере кластера)
       analyzedTableData.forEach((item, index) => {
         const groupedItem = {...item};
         groupedItem[this.GROUP_NAME_DATA_FIELD] = labels[index] + 1;
         groupedItem[this.IS_PRIMARY_DATA_FIELD] = false;
         groupedItem[this.IS_UNION_ROW_DATA_FIELD] = false;
-          this.tableData.push(groupedItem);
+        this.tableData.push(groupedItem);
       });
       this.buildTableColumns(analyzedTableData);
     });
   }
 
+  // динамическое построение колонок таблицы
   private buildTableColumns(data: any[]) {
     if (!data || data.length === 0) {
       return;
@@ -117,6 +134,7 @@ export class MatchedDataGridComponent {
     return column;
   }
 
+  // преобразование массива объектов в массив массивов
   private getDictionaryOfStringArrays(dictionary: any[]) {
     const array = [];
     dictionary.forEach(item => {
@@ -131,5 +149,48 @@ export class MatchedDataGridComponent {
       }
     });
     return array;
+  }
+
+  // процедура получения основной и объединяемых строк по каждой группе
+  private getCombinedRows(): CombinedTableRowsDataModel {
+    const combinedTableRowsModel = new CombinedTableRowsDataModel();
+    combinedTableRowsModel.groupedRows = [];
+
+    const groupedItems = this.dataGrid.instance.getDataSource().items();
+    if (groupedItems && groupedItems.length > 0) {
+      groupedItems.forEach(group => {
+        const items = group.items;
+        if (!items || items.length === 0) {
+          return;
+        }
+        const combinedRows = new CombinedRowsDataModel();
+        combinedRows.combined = [];
+        items.forEach(item => {
+          if (item[this.IS_PRIMARY_DATA_FIELD]) {
+            combinedRows.primary = this.getObjectByPrimaryKey(item);
+          }
+          if (item[this.IS_UNION_ROW_DATA_FIELD]) {
+            combinedRows.combined.push(this.getObjectByPrimaryKey(item));
+          }
+        });
+        if (combinedRows.primary && combinedRows.combined && combinedRows.combined.length > 0) {
+          combinedTableRowsModel.groupedRows.push(combinedRows);
+        }
+      });
+    }
+
+    return combinedTableRowsModel;
+  }
+
+  // процедура получения объекта с полями порвичного ключа
+  private getObjectByPrimaryKey(item: any): any {
+    if (!item || !this.primaryKeyName || this.primaryKeyName.length === 0) {
+      return;
+    }
+    const result = {};
+    this.primaryKeyName.forEach((key: string) => {
+      result[key] = item[key];
+    });
+    return result;
   }
 }

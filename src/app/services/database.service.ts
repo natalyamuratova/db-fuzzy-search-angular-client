@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {DbConnectionModel} from '../models/db-connection.model';
+import {CombinedTableRowsDataModel} from '../models/combined-table-rows-data.model';
 
 @Injectable({
   providedIn: 'root'
@@ -69,6 +70,14 @@ export class DatabaseService {
   public getClusterLabels(dictionary: any[]) {
     const url = `${this.dbConnectionUrl}/cluster`;
     return this.http.post(url, {dictionary: dictionary}, this.getDefaultHttpOptions());
+  }
+
+  public unionRows(tableName: string, data: CombinedTableRowsDataModel) {
+    if (!tableName || !data) {
+      return;
+    }
+    const url = `${this.dbConnectionUrl}/tables/${tableName}/union`;
+    return this.http.post(url, data, this.getDefaultHttpOptions());
   }
 
   private getDefaultHttpOptions() {

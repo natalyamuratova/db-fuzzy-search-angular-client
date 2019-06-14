@@ -18,5 +18,6 @@
 </ng-template>
 
 <ng-template #matchedData>
-  <app-matched-data-grid></app-matched-data-grid>
+  <app-matched-data-grid
+  (rowsCombined)="onRowsCombined($event)"></app-matched-data-grid>
 </ng-template>

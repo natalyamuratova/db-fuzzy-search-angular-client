@@ -32,4 +32,8 @@ export class DuplicatesSearchComponent {
     this.matchedDataGridComponent.update(searchModel.tableName, searchModel.columns);
   }
 
+  public onRowsCombined(tableName: string) {
+    this.allDataGridComponent.update(tableName);
+  }
+
 }
