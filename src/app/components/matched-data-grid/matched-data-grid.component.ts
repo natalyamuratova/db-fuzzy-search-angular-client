@@ -21,6 +21,7 @@ export class MatchedDataGridComponent {
   private readonly GROUP_NAME_DATA_FIELD = 'groupIndex';
   private readonly IS_PRIMARY_DATA_FIELD = 'isPrimary';
   private readonly IS_UNION_ROW_DATA_FIELD = 'isUnionRow';
+  private readonly MIN_CLUSTER_ROWS = 2;
 
   @ViewChild(DxDataGridComponent) dataGrid: DxDataGridComponent;
   @Output() rowsCombined: EventEmitter<string> = new EventEmitter();
@@ -72,16 +73,38 @@ export class MatchedDataGridComponent {
       return;
     }
     const newDictionary = this.getDictionaryOfStringArrays(dictionary);
-    this.databaseService.getClusterLabels(newDictionary).subscribe(labels => {
+    this.databaseService.getClusterLabels(newDictionary).subscribe((labels: number[]) => {
       this.tableData = [];
-      // преобразование данных таблицы (добавление данных о номере кластера)
-      analyzedTableData.forEach((item, index) => {
-        const groupedItem = {...item};
-        groupedItem[this.GROUP_NAME_DATA_FIELD] = labels[index] + 1;
-        groupedItem[this.IS_PRIMARY_DATA_FIELD] = false;
-        groupedItem[this.IS_UNION_ROW_DATA_FIELD] = false;
-        this.tableData.push(groupedItem);
+      if (!labels || labels.length === 0) {
+        return;
+      }
+      // построение словаря (ключ - индекс кластера, значения - массив номеров анализируемых строк)
+      const clusters = new Map<number, number[]>();
+      labels.forEach((label, index) => {
+        if (!clusters.has(label)) {
+          clusters.set(label, [index]);
+        } else {
+          clusters.get(label).push(index);
+        }
       });
+
+      // преобразование данных по построенному словарю
+      let grIndex = 1;
+      clusters.forEach(((value, key) => {
+        if (value.length < this.MIN_CLUSTER_ROWS) {
+          return;
+        }
+        value.forEach(rowIndex => {
+          const row = analyzedTableData[rowIndex];
+          const groupedItem = {...row};
+          groupedItem[this.GROUP_NAME_DATA_FIELD] = grIndex;
+          groupedItem[this.IS_PRIMARY_DATA_FIELD] = false;
+          groupedItem[this.IS_UNION_ROW_DATA_FIELD] = false;
+          this.tableData.push(groupedItem);
+        });
+        grIndex++;
+      }));
+
       this.buildTableColumns(analyzedTableData);
     });
   }
@@ -182,7 +205,7 @@ export class MatchedDataGridComponent {
     return combinedTableRowsModel;
   }
 
-  // процедура получения объекта с полями порвичного ключа
+  // процедура получения объекта с полями первичного ключа
   private getObjectByPrimaryKey(item: any): any {
     if (!item || !this.primaryKeyName || this.primaryKeyName.length === 0) {
       return;
