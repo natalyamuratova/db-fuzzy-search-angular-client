@@ -58,6 +58,7 @@
   <div class="search-button">
     <dx-button
       text="Поиск"
+      [disabled]="!searchModelFilled"
       (onClick)="onSearchBtnClicked($event)"
     ></dx-button>
   </div>

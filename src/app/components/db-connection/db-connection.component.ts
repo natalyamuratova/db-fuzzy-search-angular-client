@@ -1,7 +1,9 @@
-import {Component} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {DbConnectionModel} from '../../models/db-connection.model';
 import {DatabaseService} from '../../services/database.service';
 import {CommonDataService} from '../../services/common-data.service';
+import {custom, alert} from 'devextreme/ui/dialog';
+import {DxFormComponent} from 'devextreme-angular';
 
 @Component({
   selector: 'app-db-connection',
@@ -13,6 +15,8 @@ export class DbConnectionComponent {
   public connModel: DbConnectionModel;
   public formItems: any[];
 
+  @ViewChild(DxFormComponent) form: DxFormComponent;
+
   constructor(private databaseService: DatabaseService,
               private commonDataService: CommonDataService) {
     this.connModel = commonDataService.connection;
@@ -23,8 +27,26 @@ export class DbConnectionComponent {
   }
 
   public onConnectClicked(e) {
+    const validRes = this.form.instance.validate();
+    if (!validRes.isValid) {
+      return;
+    }
     this.databaseService.testConnection(this.connModel).subscribe(res => {
         this.commonDataService.connection = this.connModel;
+        custom({
+          showTitle: false,
+          message: 'Подключение успешно выполнено!',
+          buttons: [
+            {
+              text: 'OK',
+              onClick: function () {
+                return true;
+              }
+            }
+          ]
+        }).show();
+      }, err => {
+        alert('Произошла ошибка во время подключения!', 'Внимание');
       }
     );
   }
@@ -46,7 +68,8 @@ export class DbConnectionComponent {
       dataField: 'host',
       editorOptions: {
         width: '100%'
-      }
+      },
+      isRequired: true
     };
 
     return item;
@@ -60,7 +83,8 @@ export class DbConnectionComponent {
       dataField: 'port',
       editorOptions: {
         width: 200
-      }
+      },
+      isRequired: true
     };
 
     return item;
@@ -74,7 +98,8 @@ export class DbConnectionComponent {
       dataField: 'user',
       editorOptions: {
         width: '100%'
-      }
+      },
+      isRequired: true
     };
 
     return item;
@@ -89,7 +114,8 @@ export class DbConnectionComponent {
       editorOptions: {
         width: '100%',
         mode: 'password'
-      }
+      },
+      isRequired: true
     };
 
     return item;

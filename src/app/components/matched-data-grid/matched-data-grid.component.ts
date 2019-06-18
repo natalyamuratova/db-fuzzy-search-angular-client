@@ -3,6 +3,7 @@ import {DatabaseService} from '../../services/database.service';
 import {combineLatest} from 'rxjs';
 import {CombinedRowsDataModel, CombinedTableRowsDataModel} from '../../models/combined-table-rows-data.model';
 import {DxDataGridComponent} from 'devextreme-angular';
+import {custom} from 'devextreme/ui/dialog';
 
 @Component({
   selector: 'app-matched-data-grid',
@@ -38,10 +39,32 @@ export class MatchedDataGridComponent {
     if (!this.tableData || this.tableData.length === 0) {
       return;
     }
-    const combinedData = this.getCombinedRows();
-    this.databaseService.unionRows(this.currentTableName, combinedData).subscribe(res => {
-      this.rowsCombined.emit(this.currentTableName);
-      this.update(this.currentTableName, this.analyzedColumns);
+    const dialog = custom({
+      showTitle: false,
+      message: 'Вы уверены, что хотите объединить строки?',
+      buttons: [
+        {
+          text: 'Да',
+          onClick: function (e) {
+            return true;
+          }
+        },
+        {
+          text: 'Нет',
+          onClick: function (e) {
+            return false;
+          }
+        }
+      ]
+    });
+    dialog.show().done(dialogResult => {
+      if (dialogResult) {
+        const combinedData = this.getCombinedRows();
+        this.databaseService.unionRows(this.currentTableName, combinedData).subscribe(res => {
+          this.rowsCombined.emit(this.currentTableName);
+          this.update(this.currentTableName, this.analyzedColumns);
+        });
+      }
     });
   }
 
@@ -134,6 +157,18 @@ export class MatchedDataGridComponent {
     column.caption = 'Основная';
     column.dataType = 'boolean';
     column.width = 90;
+    column.setCellValue = (newData, value, currentRowData) => {
+      newData[this.IS_PRIMARY_DATA_FIELD] = value;
+      if (value) {
+        newData[this.IS_UNION_ROW_DATA_FIELD] = false;
+        const groupIndex = currentRowData[this.GROUP_NAME_DATA_FIELD];
+        this.tableData.forEach(row => {
+          if (row[this.GROUP_NAME_DATA_FIELD] === groupIndex) {
+            row[this.IS_PRIMARY_DATA_FIELD] = false;
+          }
+        });
+      }
+    };
     return column;
   }
 
@@ -143,6 +178,12 @@ export class MatchedDataGridComponent {
     column.caption = 'Объединяемая';
     column.dataType = 'boolean';
     column.width = 120;
+    column.setCellValue = (newData, value, currentRowData) => {
+      const isPrimary = currentRowData[this.IS_PRIMARY_DATA_FIELD];
+      if (!isPrimary) {
+        newData[this.IS_UNION_ROW_DATA_FIELD] = value;
+      }
+    };
     return column;
   }
 

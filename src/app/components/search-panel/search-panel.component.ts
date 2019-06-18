@@ -1,7 +1,8 @@
-import {Component, EventEmitter, Output} from '@angular/core';
+import {Component, EventEmitter, Output, ViewChild} from '@angular/core';
 import {SearchModel} from '../../models/search.model';
 import {DatabaseService} from '../../services/database.service';
 import {CommonDataService} from '../../services/common-data.service';
+import {DxFormComponent} from 'devextreme-angular';
 
 @Component({
   selector: 'app-search-panel',
@@ -12,12 +13,14 @@ export class SearchPanelComponent {
 
   public searchModel: SearchModel;
 
-  private dbNames: string[];
-  private dbTableNames: string[];
-  private tableColumns: string[];
+  public dbNames: string[];
+  public dbTableNames: string[];
+  public tableColumns: string[];
 
   @Output() searchClick: EventEmitter<SearchModel> = new EventEmitter();
   @Output() tableSelected: EventEmitter<string> = new EventEmitter();
+
+  @ViewChild(DxFormComponent) form: DxFormComponent;
 
   constructor(private databaseService: DatabaseService,
               commonDataService: CommonDataService) {
@@ -31,12 +34,21 @@ export class SearchPanelComponent {
   }
 
   public onSearchBtnClicked(e) {
+    if (!this.searchModelFilled) {
+      return;
+    }
     this.searchClick.emit(this.searchModel);
+  }
+
+  public get searchModelFilled(): boolean {
+    return (this.searchModel && this.searchModel.database && this.searchModel.tableName &&
+      this.searchModel.columns && this.searchModel.columns.length > 0);
   }
 
   public onDbSelectionChanged = (e) => {
     this.dbTableNames = [];
     this.tableColumns = [];
+    this.form.instance.getEditor('columns').reset();
     const value = e.selectedItem;
     if (!value) {
       return;
@@ -48,6 +60,7 @@ export class SearchPanelComponent {
 
   public onTableNameSelectionChanged = (e) => {
     this.tableColumns = [];
+    this.form.instance.getEditor('columns').reset();
     const value = e.selectedItem;
     this.tableSelected.emit(value);
     if (!value) {
